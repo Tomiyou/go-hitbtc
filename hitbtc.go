@@ -134,7 +134,6 @@ func (b *HitBtc) GetAllTicker() (tickers Tickers, err error) {
 	return
 }
 
-
 // Market
 
 // GetOrderbook is used to get the current order book for a market.
@@ -153,7 +152,6 @@ func (b *HitBtc) GetOrderbook(market string) (orderbook Orderbook, err error) {
 	err = json.Unmarshal(r, &orderbook)
 	return
 }
-
 
 // Account
 
@@ -354,15 +352,16 @@ func (b *HitBtc) GetTransactions(start uint64, end uint64, limit uint32) (transa
 }
 
 // Withdraw performs a withdrawal operation.
-func (b *HitBtc) Withdraw(address string, currency string, amount float64) (withdrawID string, err error) {
+func (b *HitBtc) Withdraw(address, currency, paymentId string, amount float64) (withdrawID string, err error) {
 	type withdrawResponse struct {
 		ID string `json:"id,required"`
 	}
 
 	payload := map[string]string{
-		"currency": currency,
-		"address":  address,
-		"amount":   fmt.Sprint(amount),
+		"currency":  currency,
+		"address":   address,
+		"amount":    fmt.Sprint(amount),
+		"paymentId": paymentId,
 	}
 
 	r, err := b.client.do("POST", "account/crypto/withdraw", payload, true)
@@ -423,5 +422,31 @@ func (b *HitBtc) TransferBalance(currency string, amount float64, transferType t
 		return
 	}
 	transferID = transfer.ID
+	return
+}
+
+// GetDepositAddress is used to get the deposit address for a currency
+func (b *HitBtc) GetDepositAddress(currency string) (address, paymentId string, err error) {
+	type depositAddressResponse struct {
+		Address   string `json:"address,required"`
+		PaymentId string `json:"paymentId"`
+	}
+
+	r, err := b.client.do("GET", "account/crypto/address/"+strings.ToUpper(currency), nil, false)
+	if err != nil {
+		return
+	}
+	var response interface{}
+	if err = json.Unmarshal(r, &response); err != nil {
+		return
+	}
+	if err = handleErr(response); err != nil {
+		return
+	}
+
+	var depositAddress depositAddressResponse
+	err = json.Unmarshal(r, &depositAddress)
+	address = depositAddress.Address
+	paymentId = depositAddress.PaymentId
 	return
 }
