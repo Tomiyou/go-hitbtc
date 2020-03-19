@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/bitbandi/go-hitbtc"
+	"github.com/Tomiyou/go-hitbtc"
 )
 
 const (

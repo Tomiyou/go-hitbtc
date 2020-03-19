@@ -4,7 +4,7 @@ go:
   - "1.11"
 
 before_install: go get -t ./...
-go_import_path: github.com/bitbandi/go-hitbtc
+go_import_path: github.com/Tomiyou/go-hitbtc
 
 sudo: false
 script:
